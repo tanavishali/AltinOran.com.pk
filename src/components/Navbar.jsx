@@ -1,112 +1,99 @@
-import React, { useState, useEffect } from 'react';
+"use client";
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X } from "lucide-react";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navRef = useRef(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // --- Style Objects ---
-  
-  // Base style for the navbar
-  const navbarBaseStyle = {
-    position: 'fixed',
-    width: '100%',
-    padding: '20px 40px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    boxShadow: '0 2px 15px rgba(0, 0, 0, 0.1)',
-    zIndex: 1000,
-    transition: 'all 0.3s ease',
-  };
+  // Measure navbar height and set a CSS variable
+  useEffect(() => {
+    const setNavHeightVar = () => {
+      if (navRef.current) {
+        const h = navRef.current.getBoundingClientRect().height;
+        document.documentElement.style.setProperty("--nav-height", `${h}px`);
+      }
+    };
 
-  // Style to apply when scrolled
-  const navbarScrolledStyle = {
-    padding: '12px 40px',
-  };
-
-  // Combine base and scrolled styles
-  const navbarStyle = isScrolled
-    ? { ...navbarBaseStyle, ...navbarScrolledStyle }
-    : navbarBaseStyle;
-
-  const logoStyle = {
-    fontWeight: 700,
-    fontSize: '24px',
-    color: '#0099ff',
-    display: 'flex',
-    alignItems: 'center',
-  };
-
-  const logoSpanStyle = {
-    color: '#333',
-  };
-
-  const logoIconStyle = {
-    marginRight: '10px',
-    fontSize: '28px',
-  };
-
-  const navLinksStyle = {
-    display: 'flex',
-    listStyle: 'none',
-    margin: 0, // Reset margin
-    padding: 0, // Reset padding
-  };
-
-  const navLinkItemStyle = {
-    marginLeft: '30px',
-  };
-
-  const navLinkAnchorStyle = {
-    textDecoration: 'none',
-    color: '#333',
-    fontWeight: 500,
-    transition: 'color 0.3s ease',
-  };
-
-  const contactBtnStyle = {
-    backgroundColor: '#0099ff',
-    color: 'white',
-    padding: '10px 20px',
-    borderRadius: '4px',
-    fontWeight: 600,
-    transition: 'background-color 0.3s ease',
-  };
-
-  // NOTE: The .menu-toggle and responsive styles for .nav-links
-  // are NOT included because they rely on media queries, which are
-  // impossible with inline styles.
-
-  // --- JSX ---
+    setNavHeightVar();
+    // update on resize (for responsive changes)
+    window.addEventListener("resize", setNavHeightVar);
+    return () => window.removeEventListener("resize", setNavHeightVar);
+  }, []);
 
   return (
-    <nav style={navbarStyle}>
-      <div style={logoStyle}>
-        <span style={logoIconStyle}>⚒️</span>
-        ALTIN<span>ORAN</span>
+    <nav
+      ref={navRef}
+      className={`w-full top-0 z-50 transition-all duration-300 backdrop-blur-sm ${
+        isScrolled ? "bg-[#f8fafc] shadow-md py-3" : "bg-white py-4 shadow-sm"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-5 flex justify-between items-center">
+        {/* Logo */}
+        <div className="flex items-center gap-2 text-2xl font-bold">
+          <span className="text-[#0099ff] text-3xl">⚒️</span>
+          <span className="text-gray-900">
+            ALTIN<span className="text-[#0099ff]">ORAN</span>
+          </span>
+        </div>
+
+        {/* Desktop Menu */}
+        <ul className="hidden md:flex items-center space-x-8 font-medium">
+          <li><a href="#" className="text-gray-700 hover:text-[#0099ff] transition-colors">Home</a></li>
+          <li><a href="#About" className="text-gray-700 hover:text-[#0099ff] transition-colors">About</a></li>
+          <li><a href="#MD's Message" className="text-gray-700 hover:text-[#0099ff] transition-colors">MD's Message</a></li>
+          <li><a href="serviecs.html" className="text-gray-700 hover:text-[#0099ff] transition-colors">Services</a></li>
+          <li><a href="#our-team" className="text-gray-700 hover:text-[#0099ff] transition-colors">Our Team</a></li>
+          <li><a href="#Project" className="text-gray-700 hover:text-[#0099ff] transition-colors">Projects</a></li>
+          <li>
+            <a href="#Contact" className="bg-[#0099ff] text-white px-5 py-2 rounded-md font-semibold hover:bg-[#008ae6] transition-colors">
+              Contact Us
+            </a>
+          </li>
+        </ul>
+
+        {/* Mobile Menu Button */}
+        <div className="md:hidden">
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-800 focus:outline-none">
+            {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+        </div>
       </div>
-      <ul style={navLinksStyle}>
-        <li style={navLinkItemStyle}><a href="#" style={navLinkAnchorStyle}>Home</a></li>
-        <li style={navLinkItemStyle}><a href="#About" style={navLinkAnchorStyle}>About</a></li>
-        <li style={navLinkItemStyle}><a href="#MD's Message" style={navLinkAnchorStyle}>MD's Message</a></li>
-        <li style={navLinkItemStyle}><a href="serviecs.html" style={navLinkAnchorStyle}>Services</a></li>
-        <li style={navLinkItemStyle}><a href="#our-team" style={navLinkAnchorStyle}>Our Team</a></li>
-        <li style={navLinkItemStyle}><a href="#Project" style={navLinkAnchorStyle}>Projects</a></li>
-        <li style={navLinkItemStyle}><a href="#Contact" style={{...navLinkAnchorStyle, ...contactBtnStyle}}>Contact Us</a></li>
-      </ul>
-      {/* This menu toggle is for demonstration, but the logic to show/hide 
-        the mobile menu is removed as it's not possible inline.
-      */}
-      <div style={{ display: 'none', fontSize: '24px', cursor: 'pointer' }}>☰</div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="md:hidden bg-white shadow-lg border-t border-gray-200"
+          >
+            <ul className="flex flex-col items-start px-6 py-4 space-y-4 text-gray-700 font-medium">
+              <li><a href="#" className="block hover:text-[#0099ff]" onClick={() => setIsMenuOpen(false)}>Home</a></li>
+              <li><a href="#About" className="block hover:text-[#0099ff]" onClick={() => setIsMenuOpen(false)}>About</a></li>
+              <li><a href="#MD's Message" className="block hover:text-[#0099ff]" onClick={() => setIsMenuOpen(false)}>MD's Message</a></li>
+              <li><a href="serviecs.html" className="block hover:text-[#0099ff]" onClick={() => setIsMenuOpen(false)}>Services</a></li>
+              <li><a href="#our-team" className="block hover:text-[#0099ff]" onClick={() => setIsMenuOpen(false)}>Our Team</a></li>
+              <li><a href="#Project" className="block hover:text-[#0099ff]" onClick={() => setIsMenuOpen(false)}>Projects</a></li>
+              <li>
+                <a href="#Contact" className="block w-full text-center bg-[#0099ff] text-white py-2 rounded-md font-semibold hover:bg-[#008ae6]" onClick={() => setIsMenuOpen(false)}>
+                  Contact Us
+                </a>
+              </li>
+            </ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 };

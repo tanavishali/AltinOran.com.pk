@@ -1,6 +1,12 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect, useRef } from "react"; // CHANGED: Added useRef
+import {
+  motion,
+  useInView,
+  useMotionValue,
+  useTransform,
+  animate,
+} from "framer-motion"; // CHANGED: Added more framer-motion hooks
 import {
   Award,
   Briefcase,
@@ -26,12 +32,63 @@ const itemVariants = {
   },
 };
 
+// --- NEW COMPONENT ---
+// This component handles the counting animation for a single stat
+function AnimatedStat({ numberStr, label, icon }) {
+  const ref = useRef(null);
+  // Check if the component is in view (triggers once)
+  const inView = useInView(ref, { once: true, margin: "-50px" });
+
+  // Parse the number and suffix (e.g., "100+" -> target: 100, suffix: "+")
+  const targetNumber = parseInt(numberStr, 10);
+  const suffix = numberStr.replace(targetNumber.toString(), "");
+
+  // Create a motion value, starting at 0
+  const count = useMotionValue(0);
+  // Create a transformed value that rounds the count to an integer
+  const rounded = useTransform(count, (latest) => Math.round(latest));
+
+  useEffect(() => {
+    // Animate the 'count' motion value from 0 to the target number
+    // only when the component is in view
+    if (inView) {
+      const controls = animate(count, targetNumber, {
+        duration: 7, // Animation duration in seconds
+        ease: "easeOut", // Easing function
+      });
+      // Return a cleanup function to stop the animation if the component unmounts
+      return () => controls.stop();
+    }
+  }, [inView, count, targetNumber]);
+
+  return (
+    <motion.div
+      ref={ref} // Attach the ref to this element
+      whileHover={{ scale: 1.1, y: -5 }}
+      transition={{ type: "spring", stiffness: 250 }}
+      className="flex flex-col items-center text-center w-[110px] sm:w-auto"
+    >
+      <div className="mb-2 text-blue-400">{icon}</div>
+      <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-400 mb-1">
+        {/* Display the rounded, animated number */}
+        <motion.span>{rounded}</motion.span>
+        {/* Display the suffix (like "+") */}
+        {suffix}
+      </div>
+      <div className="text-[10px] sm:text-xs md:text-sm uppercase tracking-wider text-gray-100">
+        {label}
+      </div>
+    </motion.div>
+  );
+}
+// --- END OF NEW COMPONENT ---
+
 export default function Hero() {
   const [currentImage, setCurrentImage] = useState(0);
   const [displayText, setDisplayText] = useState("");
 
   const fullText =
-    "ALTIN ORAN ENGINEERING \nARCHITECTURAL / INTERIORS \n/TOWN PLANNING CONSULTANTS";
+    "ALTIN ORAN ENGINEERING \nARCHITECTURAL / INTERIORS \n /TOWN PLANNING CONSULTANTS";
 
   // Typing Effect
   useEffect(() => {
@@ -106,6 +163,8 @@ export default function Hero() {
 
   return (
     <section className="relative w-full min-h-screen overflow-hidden flex items-center bg-[#0a0a0a] text-white pt-[var(--nav-height)]">
+      {/* ... (all your background and icon elements remain the same) ... */}
+      
       {/* Animated gradient background */}
       <motion.div
         className="absolute inset-0 bg-gradient-to-r from-[#001f3f] via-[#004080] to-[#00aaff] opacity-30"
@@ -135,6 +194,8 @@ export default function Hero() {
           initial="hidden"
           animate="visible"
         >
+          {/* ... (all your typing text and buttons remain the same) ... */}
+
           {/* Typing Effect Heading */}
           <motion.h1
             className="text-2xl sm:text-2xl md:text-2xl lg:text-2xl font-extrabold mb-6 leading-tight whitespace-pre-line"
@@ -186,27 +247,23 @@ export default function Hero() {
             className="flex flex-wrap justify-center lg:justify-start gap-6 sm:gap-10 mt-12 sm:mt-16"
             variants={itemVariants}
           >
+            {/* --- CHANGED --- */}
+            {/* We now map over the stats and render our new AnimatedStat component */}
             {stats.map((stat, i) => (
-              <motion.div
+              <AnimatedStat
                 key={i}
-                whileHover={{ scale: 1.1, y: -5 }}
-                transition={{ type: "spring", stiffness: 250 }}
-                className="flex flex-col items-center text-center w-[110px] sm:w-auto"
-              >
-                <div className="mb-2 text-cyan-400">{stat.icon}</div>
-                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-cyan-400 mb-1">
-                  {stat.number}
-                </div>
-                <div className="text-[10px] sm:text-xs md:text-sm uppercase tracking-wider text-gray-300">
-                  {stat.label}
-                </div>
-              </motion.div>
+                numberStr={stat.number}
+                label={stat.label}
+                icon={stat.icon}
+              />
             ))}
+            {/* --- END OF CHANGE --- */}
           </motion.div>
         </motion.div>
 
         {/* Right Side (Image Slider) */}
         <div className="relative h-[250px] sm:h-[300px] md:h-[400px] lg:h-[500px] w-full rounded-2xl overflow-hidden shadow-xl">
+          {/* ... (image slider remains the same) ... */}
           {images.map((img, i) => (
             <motion.img
               key={i}

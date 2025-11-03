@@ -2,22 +2,11 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Wrench,
-  Cog,
-  HardHat,
-  Building2,
   Award,
   Briefcase,
   Lightbulb,
   Hammer,
 } from "lucide-react";
-
-const floatAnim = {
-  animate: {
-    y: [0, -12, 0],
-    transition: { duration: 3, repeat: Infinity, ease: "easeInOut" },
-  },
-};
 
 const About = () => {
   const images = [
@@ -44,45 +33,30 @@ const About = () => {
       id="About"
       className="relative bg-gradient-to-b from-[#0A192F] via-[#0E223F] to-[#112240] text-[#E6F1FF] overflow-hidden"
     >
-      {/* Floating Icons */}
-      <motion.div
-        className="absolute inset-0 z-0 opacity-10 pointer-events-none"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.15 }}
-        transition={{ duration: 1.5 }}
-      >
-        <motion.div
-          className="absolute top-14 left-12 text-[#0099FF]"
-          variants={floatAnim}
-          animate="animate"
-        >
-          <HardHat size={80} />
-        </motion.div>
-        <motion.div
-          className="absolute top-1/3 right-24 text-[#5AC8FA]"
-          variants={floatAnim}
-          animate="animate"
-        >
-          <Wrench size={70} />
-        </motion.div>
-        <motion.div
-          className="absolute bottom-28 left-1/3 text-[#0099FF]"
-          variants={floatAnim}
-          animate="animate"
-        >
-          <Cog size={90} />
-        </motion.div>
-        <motion.div
-          className="absolute bottom-10 right-10 text-[#5AC8FA]"
-          variants={floatAnim}
-          animate="animate"
-        >
-          <Building2 size={100} />
-        </motion.div>
-      </motion.div>
+      {/* Mobile-only Background Image - Now a changing slider with dark overlay */}
+      <div className="absolute inset-0 z-0 lg:hidden">
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={images[currentIndex]}
+            src={images[currentIndex]}
+            alt="Building background"
+            // Ensure the image covers the entire container and has some opacity
+            className="w-full h-full object-cover opacity-20"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.2 }} // Animate to 20% opacity
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1, ease: "easeInOut" }}
+            onError={(e) => {
+              e.target.style.display = 'none';
+            }}
+          />
+        </AnimatePresence>
+        {/* Dark overlay for better text readability on mobile, now lighter as image has opacity */}
+        <div className="absolute inset-0 bg-black/40"></div> {/* Adjusted overlay opacity */}
+      </div>
 
       {/* Main Section */}
-      <section className="relative flex flex-col-reverse lg:flex-row items-center justify-between px-6 lg:px-20 py-20 gap-10 z-10">
+      <section className="relative flex flex-col-reverse lg:flex-row items-center justify-between px-6 lg:px-20 py-20 gap-10 z-20"> {/* Ensure content is above background */}
         {/* Text Section */}
         <motion.div
           className="flex-1 space-y-6"
@@ -112,9 +86,9 @@ const About = () => {
           </p>
         </motion.div>
 
-        {/* Smooth Image Slider */}
+        {/* Smooth Image Slider - HIDDEN on mobile, visible on lg+ */}
         <motion.div
-          className="flex-1 relative flex justify-center items-center h-[350px] md:h-[450px]"
+          className="flex-1 relative justify-center items-center h-[350px] md:h-[450px] hidden lg:flex"
           initial={{ opacity: 0, x: 50 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
@@ -131,6 +105,9 @@ const About = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.05 }}
                 transition={{ duration: 1, ease: "easeInOut" }}
+                onError={(e) => {
+                  e.target.src = `https://placehold.co/400x400/0A192F/E6F1FF?text=Image+Not+Found`;
+                }}
               />
             </AnimatePresence>
           </div>
@@ -138,7 +115,7 @@ const About = () => {
       </section>
 
       {/* Info Cards */}
-      <section className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-6 lg:px-20 pb-20 z-10">
+      <section className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-6 lg:px-20 pb-20 z-20"> {/* Ensure content is above background */}
         {[
           {
             icon: <Briefcase size={32} className="text-[#0099FF]" />,
@@ -174,3 +151,4 @@ const About = () => {
 };
 
 export default About;
+
